@@ -85,7 +85,6 @@ export function ContactFooter() {
     gsap.registerPlugin(ScrollTrigger)
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const pointerEnabled = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    const introDuration = reducedMotion ? 0.42 : 1
     const fillDuration = reducedMotion ? 0.24 : 0.62
     const shiftDistance = reducedMotion ? 5 : 12
     const outlines = gsap.utils.toArray<SVGPathElement>('.contact-letter-outline', svg)
@@ -98,33 +97,10 @@ export function ContactFooter() {
     const context = gsap.context(() => {
       outlines.forEach((outline) => {
         const length = outline.getTotalLength()
-        gsap.set(outline, { strokeDasharray: length, strokeDashoffset: length, opacity: 0.18 })
+        gsap.set(outline, { strokeDasharray: length, strokeDashoffset: 0, opacity: 1 })
       })
-      gsap.set(primaryUi, { y: 12, opacity: 0 })
-      gsap.set(secondaryUi, { y: 8, opacity: 0 })
-
-      gsap.timeline({ scrollTrigger: { trigger: section, start: 'top 72%', once: true } })
-        .to(outlines, {
-          strokeDashoffset: 0,
-          opacity: 1,
-          duration: introDuration,
-          stagger: 0.045,
-          ease: 'power2.out',
-        })
-        .to(primaryUi, {
-          y: 0,
-          opacity: 1,
-          duration: reducedMotion ? 0.3 : 0.48,
-          stagger: 0.04,
-          ease: 'power2.out',
-        }, reducedMotion ? 0.22 : 0.58)
-        .to(secondaryUi, {
-          y: 0,
-          opacity: 1,
-          duration: reducedMotion ? 0.3 : 0.5,
-          stagger: 0.03,
-          ease: 'power2.out',
-        }, reducedMotion ? 0.28 : 0.7)
+      gsap.set(primaryUi, { y: 0, opacity: 1 })
+      gsap.set(secondaryUi, { y: 0, opacity: 1 })
 
       if (!reducedMotion) {
         letterRefs.current.forEach((letter, index) => {
