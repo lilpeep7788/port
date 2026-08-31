@@ -20,7 +20,8 @@ export function ProjectRow({ project, image, imageIndex }: ProjectRowProps) {
             className="absolute inset-0 h-full w-full object-cover"
             width="1200"
             height="750"
-            loading="eager"
+            loading="lazy"
+            fetchPriority="low"
             decoding="async"
             data-image-index={imageIndex}
           />

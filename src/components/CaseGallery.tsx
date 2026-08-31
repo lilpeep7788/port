@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import type { Project } from '../data/projects'
 import { ImageLightbox } from './ImageLightbox'
 import { useLanguage } from '../i18n'
+import { LazyVideo } from './LazyVideo'
 
 export function CaseGallery({ project }: { project: Project }) {
   const { t } = useLanguage()
@@ -15,15 +16,10 @@ export function CaseGallery({ project }: { project: Project }) {
       <div className="case-gallery">
         {project.previewVideo && (
           <div className="case-video-frame" data-reveal>
-            <video
+            <LazyVideo
               src={project.previewVideo}
               poster={project.homeImages[0]}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              aria-label={`${project.title} — ${t.case.demo}`}
+              ariaLabel={`${project.title} — ${t.case.demo}`}
             />
             <span className="case-video-label">{t.case.videoPreview}</span>
           </div>
@@ -41,8 +37,8 @@ export function CaseGallery({ project }: { project: Project }) {
             <img
               src={src}
               alt={`${project.title} — ${t.projects.preview}, ${index + 1}`}
-              loading="eager"
-              fetchPriority={index < 2 ? 'high' : 'auto'}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 ? 'high' : 'low'}
               decoding="async"
             />
           </button>

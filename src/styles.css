@@ -647,9 +647,68 @@ svg image {
 .flex { display: flex; }
 .w-max { width: max-content; }
 
+.infinite-slider {
+  overflow: hidden;
+}
+
+.infinite-slider-track,
+.infinite-slider-sequence {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  gap: var(--slider-gap);
+}
+
+.infinite-slider-track {
+  animation: infinite-slider-x var(--slider-duration) linear infinite;
+  will-change: transform;
+}
+
+.infinite-slider:hover .infinite-slider-track {
+  animation-duration: var(--slider-hover-duration);
+}
+
+.infinite-slider[data-reverse='true'] .infinite-slider-track {
+  animation-direction: reverse;
+}
+
+.infinite-slider[data-direction='vertical'] .infinite-slider-track,
+.infinite-slider[data-direction='vertical'] .infinite-slider-sequence {
+  flex-direction: column;
+}
+
+.infinite-slider[data-direction='vertical'] .infinite-slider-track {
+  animation-name: infinite-slider-y;
+}
+
+@keyframes infinite-slider-x {
+  to { transform: translate3d(calc(-50% - var(--slider-gap) / 2), 0, 0); }
+}
+
+@keyframes infinite-slider-y {
+  to { transform: translate3d(0, calc(-50% - var(--slider-gap) / 2), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infinite-slider-track {
+    animation-play-state: paused;
+    will-change: auto;
+  }
+}
+
 .projects-slider {
   width: 100%;
   overflow: hidden;
+}
+
+.selected-projects {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1800px;
+}
+
+.route-loading {
+  min-height: 100vh;
+  background: var(--paper);
 }
 
 [data-reveal] {
@@ -2461,69 +2520,6 @@ body.about-route .about-notification-dot {
   transform: translateY(8px);
 }
 
-.about-static-cards {
-  display: none;
-}
-
-.about-static-card {
-  position: absolute;
-  display: flex;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.055em;
-  opacity: 0.98;
-  animation: about-static-card-in 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.about-static-card--vertical {
-  top: 55%;
-  right: -16px;
-  width: 104px;
-  height: 42px;
-  color: #fff;
-  font-size: 15px;
-  background: #ff3228;
-  transform: rotate(5deg);
-  animation-delay: 180ms;
-}
-
-.about-static-card--rhythm {
-  top: 68%;
-  right: 18px;
-  width: 98px;
-  height: 62px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 11px 13px;
-  border: 1px solid #d8d8d4;
-  color: #111;
-  font-size: 14px;
-  background: #fff;
-  transform: rotate(-4deg);
-  animation-delay: 300ms;
-}
-
-.about-static-card--rhythm span:last-child {
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.about-static-card--ai {
-  top: 83%;
-  left: -8px;
-  width: 62px;
-  height: 42px;
-  color: #fff;
-  font-size: 18px;
-  background: #111;
-  transform: rotate(7deg);
-  animation-delay: 420ms;
-}
-
 .about-intro-grid {
   position: relative;
   z-index: 2;
@@ -2540,31 +2536,6 @@ body.about-route .about-notification-dot {
   .about-card-canvas,
   .about-cursor-hint {
     display: none;
-  }
-
-  .about-static-cards {
-    position: absolute;
-    inset: 0;
-    display: block;
-    overflow: hidden;
-  }
-
-}
-
-@keyframes about-static-card-in {
-  from {
-    opacity: 0;
-    translate: 0 -22px;
-  }
-  to {
-    opacity: 0.98;
-    translate: 0 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .about-static-card {
-    animation: none;
   }
 }
 
@@ -5065,10 +5036,10 @@ body.about-route .about-notification-dot {
   }
 
   .about-capability {
-    min-height: 240px;
+    min-height: 0;
     padding: 14px;
     border-radius: 14px;
-    grid-template-rows: auto auto 130px;
+    grid-template-rows: auto auto auto;
   }
 
   .about-capability-heading { gap: 10px; }
@@ -5077,7 +5048,15 @@ body.about-route .about-notification-dot {
   .about-capability-icon svg { width: 16px; height: 16px; }
   .about-capability-tags { gap: 5px; margin-top: 8px; }
   .about-capability-tags > span { padding: 3px 8px 4px; font-size: 9px; }
-  .about-capability-preview { height: 130px; margin-top: 9px; border-radius: 10px; }
+  .about-capability-preview {
+    height: auto;
+    margin-top: 9px;
+    border-radius: 10px;
+  }
+  .about-capability-preview > img {
+    height: auto;
+    object-fit: contain;
+  }
   .about-capability-description { display: none; }
 }
 
@@ -5090,8 +5069,8 @@ body.about-route .about-notification-dot {
   .about-phone { width: min(108vw, 450px); }
   .about-phone-screen { padding-right: 20px; padding-left: 20px; }
   .about-phone-message strong { font-size: 19px; }
-  .about-capability { min-height: 222px; grid-template-rows: auto auto 118px; }
-  .about-capability-preview { height: 118px; }
+  .about-capability { min-height: 0; grid-template-rows: auto auto auto; }
+  .about-capability-preview { height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

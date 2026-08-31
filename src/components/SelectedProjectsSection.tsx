@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { projects } from '../data/projects'
 import { preloadProjectAssets, preloadProjectsIndexAssets } from '../lib/preloadAssets'
@@ -14,34 +13,6 @@ export function SelectedProjectsSection() {
   const { t } = useLanguage()
   const featuredProjects = projects.filter((project) => project.featured)
 
-  useEffect(() => {
-    let idleCallback = 0
-    let fallbackTimer = 0
-
-    const warmProjectsIndex = () => {
-      const requestIdle = Reflect.get(window, 'requestIdleCallback') as typeof window.requestIdleCallback | undefined
-      if (requestIdle) {
-        idleCallback = requestIdle.call(
-          window,
-          () => preloadProjectsIndexAssets(projects),
-          { timeout: 3000 },
-        )
-      } else {
-        fallbackTimer = window.setTimeout(() => preloadProjectsIndexAssets(projects), 600)
-      }
-    }
-
-    if (document.readyState === 'complete') warmProjectsIndex()
-    else window.addEventListener('load', warmProjectsIndex, { once: true })
-
-    return () => {
-      window.removeEventListener('load', warmProjectsIndex)
-      const cancelIdle = Reflect.get(window, 'cancelIdleCallback') as typeof window.cancelIdleCallback | undefined
-      if (idleCallback && cancelIdle) cancelIdle.call(window, idleCallback)
-      if (fallbackTimer) window.clearTimeout(fallbackTimer)
-    }
-  }, [])
-
   const warmAllProjects = () => preloadProjectsIndexAssets(projects, 'high')
 
   return (
@@ -51,8 +22,9 @@ export function SelectedProjectsSection() {
         <AppLink
           className="all-projects-link"
           to="/work"
-          onPointerEnter={warmAllProjects}
-          onPointerDown={warmAllProjects}
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse') warmAllProjects()
+          }}
           onFocus={warmAllProjects}
         >
           <span>{t.projects.all}</span>
@@ -73,8 +45,9 @@ export function SelectedProjectsSection() {
                 state={{ projectOrigin: 'home' }}
                 aria-labelledby={titleId}
                 aria-label={`${t.projects.openCase} ${project.title}`}
-                onPointerEnter={warmProject}
-                onPointerDown={warmProject}
+                onPointerEnter={(event) => {
+                  if (event.pointerType === 'mouse') warmProject()
+                }}
                 onFocus={warmProject}
               >
                 <InfiniteSlider

@@ -691,19 +691,9 @@ export function CursorCardField({ language }: { language: Language }) {
     }
   }, [language])
 
-  const rhythm = language === 'ru' ? ['РИТМ', 'ПОДАЧА'] : ['RHYTHM', 'DELIVERY']
-
   return (
     <div ref={fieldRef} className="about-card-field" aria-hidden="true">
       <canvas ref={canvasRef} className="about-card-canvas" width={1} height={1} />
-      <div className="about-static-cards">
-        <span className="about-static-card about-static-card--vertical">VERTICAL</span>
-        <span className="about-static-card about-static-card--rhythm">
-          <span>{rhythm[0]}</span>
-          <span>{rhythm[1]}</span>
-        </span>
-        <span className="about-static-card about-static-card--ai">AI</span>
-      </div>
       <span className="about-cursor-hint">
         <span aria-hidden="true" />
         {language === 'ru' ? 'Проведи мышью' : 'Move your cursor'}

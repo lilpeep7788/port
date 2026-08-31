@@ -1,11 +1,12 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { PageTransition } from './components/PageTransition'
 import { SiteHeader } from './components/SiteHeader'
-import { CaseStudyPage } from './pages/CaseStudyPage'
-import { AllProjectsPage } from './pages/AllProjectsPage'
-import { AboutPage } from './pages/AboutPage'
 import { HomePage } from './pages/HomePage'
 import { useRouter } from './router'
+
+const CaseStudyPage = lazy(() => import('./pages/CaseStudyPage').then((module) => ({ default: module.CaseStudyPage })))
+const AllProjectsPage = lazy(() => import('./pages/AllProjectsPage').then((module) => ({ default: module.AllProjectsPage })))
+const AboutPage = lazy(() => import('./pages/AboutPage').then((module) => ({ default: module.AboutPage })))
 
 function AppRouter() {
   const { location } = useRouter()
@@ -30,7 +31,9 @@ function AppRouter() {
 
   return (
     <PageTransition pageKey={pathname} key={pathname}>
-      {page}
+      <Suspense fallback={<main className="route-loading" aria-busy="true" aria-label="Загрузка страницы" />}>
+        {page}
+      </Suspense>
     </PageTransition>
   )
 }

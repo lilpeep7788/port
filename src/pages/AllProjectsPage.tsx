@@ -4,11 +4,16 @@ import { useLanguage } from '../i18n'
 import { useReveal } from '../hooks/useReveal'
 import { preloadProjectAssets } from '../lib/preloadAssets'
 import { AppLink } from '../router'
+import { LazyVideo } from '../components/LazyVideo'
 
 const catalogueProjects = [
   ...projects.filter((project) => project.slug === 'aurelia'),
   ...projects.filter((project) => project.slug !== 'aurelia'),
 ]
+
+const projectThumbnail = (source: string) => source
+  .replace('/assets/projects/', '/assets/project-slider/')
+  .replace(/\.png$/, '.webp')
 
 export function AllProjectsPage() {
   const { language, t } = useLanguage()
@@ -32,6 +37,9 @@ export function AllProjectsPage() {
           {catalogueProjects.map((project, index) => {
             const projectCopy = getLocalizedProject(project, language)
             const warmProject = () => preloadProjectAssets(project)
+            const thumbnail = project.slug === 'aurelia'
+              ? project.homeImages[0]
+              : projectThumbnail(project.homeImages[0])
             return (
             <article
               className={`all-project-card${project.previewVideo ? ' all-project-card--video' : ''}`}
@@ -49,22 +57,17 @@ export function AllProjectsPage() {
               >
                 <div className="all-project-media">
                   {project.previewVideo ? (
-                    <video
+                    <LazyVideo
                       src={project.previewVideo}
-                      poster={project.homeImages[0]}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      aria-label={`${project.title} — ${t.projects.videoPreview}`}
+                      poster={thumbnail}
+                      ariaLabel={`${project.title} — ${t.projects.videoPreview}`}
                     />
                   ) : (
                     <img
-                      src={project.homeImages[0]}
+                      src={thumbnail}
                       alt={`${project.title} — ${t.projects.preview}`}
-                      loading="eager"
-                      fetchPriority={index < 2 ? 'high' : 'auto'}
+                      loading={index < 2 ? 'eager' : 'lazy'}
+                      fetchPriority={index < 2 ? 'high' : 'low'}
                       decoding="async"
                     />
                   )}

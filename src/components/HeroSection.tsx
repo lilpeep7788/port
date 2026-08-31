@@ -101,10 +101,9 @@ export function HeroSection() {
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const isTouchLayout = window.matchMedia('(hover: none), (pointer: coarse)').matches || window.innerWidth < 768
-    // Embedded desktop browsers may incorrectly expose reduced motion. Keep the
-    // requested interaction active when a real mouse is present, while still
-    // using the calm static variant on touch/mobile layouts.
-    const reducedMotion = isTouchLayout && prefersReducedMotion
+    // Touch devices get the static hero immediately. This avoids running the
+    // SVG and scroll timelines during the most performance-sensitive startup.
+    const reducedMotion = isTouchLayout || prefersReducedMotion
     const canUsePointer = !isTouchLayout && window.matchMedia('(hover: hover) and (pointer: fine)').matches
     let removePointerListeners: (() => void) | undefined
     let stopOrbitField: (() => void) | undefined

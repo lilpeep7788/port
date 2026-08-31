@@ -1,20 +1,15 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import { useMotionValue, animate, motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import useMeasure from 'react-use-measure';
+import type { CSSProperties, ReactNode } from 'react'
 
 type InfiniteSliderProps = {
-  children: React.ReactNode;
-  gap?: number;
-  duration?: number;
-  durationOnHover?: number;
-  direction?: 'horizontal' | 'vertical';
-  reverse?: boolean;
-  className?: string;
-  ariaHidden?: boolean;
-};
+  children: ReactNode
+  gap?: number
+  duration?: number
+  durationOnHover?: number
+  direction?: 'horizontal' | 'vertical'
+  reverse?: boolean
+  className?: string
+  ariaHidden?: boolean
+}
 
 export function InfiniteSlider({
   children,
@@ -26,85 +21,24 @@ export function InfiniteSlider({
   className,
   ariaHidden = false,
 }: InfiniteSliderProps) {
-  const [currentDuration, setCurrentDuration] = useState(duration);
-  const [ref, { width, height }] = useMeasure();
-  const translation = useMotionValue(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [key, setKey] = useState(0);
-
-  useEffect(() => {
-    let controls;
-    const size = direction === 'horizontal' ? width : height;
-    const contentSize = size + gap;
-    const from = reverse ? -contentSize / 2 : 0;
-    const to = reverse ? 0 : -contentSize / 2;
-
-    if (isTransitioning) {
-      controls = animate(translation, [translation.get(), to], {
-        ease: 'linear',
-        duration:
-          currentDuration * Math.abs((translation.get() - to) / contentSize),
-        onComplete: () => {
-          setIsTransitioning(false);
-          setKey((prevKey) => prevKey + 1);
-        },
-      });
-    } else {
-      controls = animate(translation, [from, to], {
-        ease: 'linear',
-        duration: currentDuration,
-        repeat: Infinity,
-        repeatType: 'loop',
-        repeatDelay: 0,
-        onRepeat: () => {
-          translation.set(from);
-        },
-      });
-    }
-
-    return controls?.stop;
-  }, [
-    key,
-    translation,
-    currentDuration,
-    width,
-    height,
-    gap,
-    isTransitioning,
-    direction,
-    reverse,
-  ]);
-
-  const hoverProps = durationOnHover
-    ? {
-        onHoverStart: () => {
-          setIsTransitioning(true);
-          setCurrentDuration(durationOnHover);
-        },
-        onHoverEnd: () => {
-          setIsTransitioning(true);
-          setCurrentDuration(duration);
-        },
-      }
-    : {};
+  const style = {
+    '--slider-gap': `${gap}px`,
+    '--slider-duration': `${duration}s`,
+    '--slider-hover-duration': `${durationOnHover ?? duration}s`,
+  } as CSSProperties
 
   return (
-    <div className={cn('overflow-hidden', className)} aria-hidden={ariaHidden || undefined}>
-      <motion.div
-        className='flex w-max'
-        style={{
-          ...(direction === 'horizontal'
-            ? { x: translation }
-            : { y: translation }),
-          gap: `${gap}px`,
-          flexDirection: direction === 'horizontal' ? 'row' : 'column',
-        }}
-        ref={ref}
-        {...hoverProps}
-      >
-        {children}
-        {children}
-      </motion.div>
+    <div
+      className={`infinite-slider${className ? ` ${className}` : ''}`}
+      aria-hidden={ariaHidden || undefined}
+      data-direction={direction}
+      data-reverse={reverse || undefined}
+      style={style}
+    >
+      <div className="infinite-slider-track">
+        <div className="infinite-slider-sequence">{children}</div>
+        <div className="infinite-slider-sequence" aria-hidden="true">{children}</div>
+      </div>
     </div>
-  );
+  )
 }

@@ -103,6 +103,8 @@ const disciplinePreviews: Record<DisciplineKey, string> = {
   carousels: '/assets/about/disciplines/carousels-v2.png',
 }
 
+const cursorFieldQuery = '(hover: hover) and (pointer: fine) and (min-width: 901px)'
+
 const CursorCardField = lazy(() => import('../components/about/CursorCardField').then((module) => ({
   default: module.CursorCardField,
 })))
@@ -120,6 +122,9 @@ function DisciplineIcon({ type }: { type: DisciplineKey }) {
 export function AboutPage() {
   const { language } = useLanguage()
   const copy = aboutCopy[language]
+  const [showCursorField, setShowCursorField] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia(cursorFieldQuery).matches
+  ))
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineKey>('copywriting')
   const [pageEntered, setPageEntered] = useState(false)
   const [methodEntered, setMethodEntered] = useState(false)
@@ -133,6 +138,15 @@ export function AboutPage() {
       document.body.classList.remove('about-route')
       document.documentElement.classList.remove('about-route')
     }
+  }, [])
+
+  useEffect(() => {
+    const query = window.matchMedia(cursorFieldQuery)
+    const syncCursorField = () => setShowCursorField(query.matches)
+
+    syncCursorField()
+    query.addEventListener('change', syncCursorField)
+    return () => query.removeEventListener('change', syncCursorField)
   }, [])
 
   useEffect(() => {
@@ -181,9 +195,11 @@ export function AboutPage() {
   return (
     <main className={`about-page ${pageEntered ? 'is-entered' : ''}`}>
       <section className="about-slide about-intro" aria-labelledby="about-intro-title">
-        <Suspense fallback={null}>
-          <CursorCardField language={language} />
-        </Suspense>
+        {showCursorField && (
+          <Suspense fallback={null}>
+            <CursorCardField language={language} />
+          </Suspense>
+        )}
         <div className="about-intro-grid">
           <figure className="about-portrait about-entry about-entry--portrait">
             <img src="/assets/about/portrait-night.png" alt={copy.intro.photoAlt} width="960" height="1280" loading="eager" fetchPriority="high" />
@@ -228,7 +244,7 @@ export function AboutPage() {
                 </span>
                 <span className="about-capability-tags">{discipline.tags.map((tag) => <span key={tag}>{tag}</span>)}</span>
                 <span className="about-capability-preview" aria-hidden="true">
-                  <img src={disciplinePreviews[key]} alt="" width="432" height="568" />
+                  <img src={disciplinePreviews[key]} alt="" width="432" height="568" loading="lazy" decoding="async" />
                 </span>
                 <span className="about-capability-description">{discipline.description}</span>
               </button>

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useLanguage } from '../i18n'
@@ -93,6 +93,7 @@ const serviceScenes: Record<'ru' | 'en', ServiceScene[]> = {
 export function CloudWordmarkSection() {
   const { language, t } = useLanguage()
   const scenes = serviceScenes[language]
+  const [mediaReady, setMediaReady] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const sceneRef = useRef<HTMLDivElement>(null)
   const introRef = useRef<HTMLDivElement>(null)
@@ -102,6 +103,25 @@ export function CloudWordmarkSection() {
   const projectMediaRefs = useRef<SVGGElement[]>([])
   const serviceRefs = useRef<Array<HTMLElement | null>>([])
   const visualRefs = useRef<Array<Array<HTMLDivElement | null>>>([[], [], []])
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    if (!('IntersectionObserver' in window)) {
+      setMediaReady(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      setMediaReady(true)
+      observer.disconnect()
+    }, { rootMargin: '240px 0px' })
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   useLayoutEffect(() => {
     const section = sectionRef.current
@@ -483,7 +503,16 @@ export function CloudWordmarkSection() {
                     ref={(node) => { visualRefs.current[sceneIndex][visualIndex] = node }}
                   >
                     <div className="service-visual-magnetic">
-                      <img src={visual.src} alt={visual.alt} loading="eager" decoding="async" draggable="false" />
+                      {mediaReady && (
+                        <img
+                          src={visual.src}
+                          alt={visual.alt}
+                          loading="lazy"
+                          fetchPriority="low"
+                          decoding="async"
+                          draggable="false"
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
